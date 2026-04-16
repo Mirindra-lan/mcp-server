@@ -14,7 +14,7 @@ interface TicketData {
   urgency?: number;
   impact?: number;
   type?: number;
-  location?: string;
+  location?: number;
   request_type?: number;
 }
 
@@ -119,13 +119,13 @@ class TicketManager {
     }
 
     const data = new FormData();
-    data.append("name", tic.getName());
-    data.append("content", tic.getContent());
+    data.append("name", String(tic.getName()));
+    data.append("content", String(tic.getContent()));
     data.append("urgency", String(tic.getUrgency()));
     data.append("impact", String(tic.getImpact()));
     data.append("type", "1");
     data.append("category", String(tic.getCategory()));
-    data.append("location", tic.getLocation());
+    data.append("location", String(tic.getLocation()));
     data.append("request_type", "1");
 
     try {
@@ -134,8 +134,8 @@ class TicketManager {
       });
       console.log("Ticket created: ", res.data);
       return res.data;
-    } catch {
-      console.log("Error: not created");
+    } catch(err: any) {
+      console.log("Error: not created, error :", err);
       return null;
     }
   }

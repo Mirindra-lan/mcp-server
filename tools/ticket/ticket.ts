@@ -3,7 +3,7 @@ interface TicketData {
   content?: string;
   impact?: number;
   urgency?: number;
-  location?: string;
+  location?: number;
   category?: number;
 }
 
@@ -12,7 +12,7 @@ class Ticket {
   content?: string;
   impact?: number;
   urgency?: number;
-  location?: string;
+  location?: number;
   category?: number;
 
   constructor(ticket: string) {
@@ -43,7 +43,7 @@ class Ticket {
     return this.urgency;
   }
 
-  getLocation(): string | undefined {
+  getLocation(): number | undefined {
     return this.location;
   }
 
@@ -52,20 +52,8 @@ class Ticket {
   }
 
   private jsonParser(str: string): TicketData | null {
-    const openIndex = str.lastIndexOf("{");
-    const closeIndex = str.indexOf("}");
-    let cleanJson = "";
-
-    if (openIndex !== -1 && closeIndex !== -1) {
-      cleanJson = str.slice(openIndex, closeIndex + 1);
-    }
-
-    if (!cleanJson) {
-      return null;
-    }
-
     try {
-      const data: TicketData = JSON.parse(cleanJson);
+      const data: TicketData = JSON.parse(str);
       return data;
     } catch {
       return null;

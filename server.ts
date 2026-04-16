@@ -7,6 +7,9 @@ import { z } from "zod";
 import { randomUUID } from "crypto";
 import cors from "cors";
 import "dotenv/config";
+import TicketManager from "./tools/ticket/ticketManager";
+import { transferCallToExtension, callNumber } from "./tools/call/transfertCall";
+import { getUserTTplanning, getRangeTTplanning } from "./tools/planning/getPlanning";
 
 const app = express();
 app.use(cors());
@@ -39,6 +42,207 @@ function createMcpServer(): McpServer {
       };
     }
   );
+
+  server.tool(
+    "create-ticket",
+    "Create GLPI ticket for a request or issue",
+    {
+      name: z.string().describe("The subject of the ticket"),
+      content: z.string().describe("The description of the ticket"),
+      impact: z.number().int().describe("Impact (1-5)"),
+      urgency: z.number().int().describe("Urgency (1-5)"),
+      category: z.number().int().describe("Category ID"),
+      location: z.number().int().describe("Location name or ID")
+    },
+  async ({name, content, impact, urgency, category, location}) => {
+    const manager = new TicketManager();
+    try {
+      // Pass as string because Ticket constructor expects a string to parse
+      const res = await (manager as any).create(JSON.stringify({
+        name: name,
+        category: category,
+        content: content,
+        impact: impact,
+        urgency: urgency,
+        location: location
+      }));
+
+      if(res) {
+        return {
+          content: [
+            {type: "text", text: `Ticket created successfully, ticket information: ${JSON.stringify(res)}`}
+          ]
+        }
+      } else {
+        return {
+          content: [
+            {type: "text", text: `Creating ticket failed. Please check if category and location are valid.`}
+          ]
+        }
+      }
+
+    } catch (error: any) {
+      return {
+        content: [
+          {type: "text", text: `Error create ticket, error information ${error.message || error}`}
+        ]
+      }
+    }
+  });
+
+  server.tool(
+    "delete-ticket",
+    "Delete a GLPI ticket by ticket id",
+    {
+      id: z.number().describe("The Id of the ticket to delete")
+    },
+    async ({id}) => {
+      const manager = new TicketManager();
+      try {
+        const result = await manager.delete(id);
+        return {
+          content: [
+            {type: "text", text: `Ticket ${id} deleted successfully`}
+          ]
+        }
+      } catch (error: any) {
+        return {
+          content: [
+            {type: "text", text: `Error deleting ticket ${id} : ${error}`}
+          ]
+        }
+      }
+    }
+  )
+
+  server.tool(
+    "transfer-call",
+    "Transfer all active calls from AVR 5070 to another extension",
+    {
+      extension: z.string().describe("Target extension to transfer the call to"),
+    },
+    async ({ extension }) => {
+      try {
+        const result = await transferCallToExtension(extension);
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Call(s) transferred to extension ${extension}`,
+            },
+          ],
+        };
+      } catch (error: any) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Transfer failed: ${error.message || error}`,
+            },
+          ],
+        };
+      }
+    }
+  );
+
+  server.tool(
+  "call-number",
+  "Call an extension or number from the server",
+  {
+    extension: z.string().describe("The extension or number to call"),
+  },
+  async ({ extension }) => {
+    try {
+      const res = await callNumber(extension);
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Calling ${extension}...`,
+          },
+        ],
+      };
+    } catch (error: any) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Call failed: ${error.message || error}`,
+          },
+        ],
+      };
+    }
+  }
+);
+
+server.tool(
+  "get-user-planning",
+  "Get planning for a specific user between two dates",
+  {
+    user_id: z.number().optional(),
+    startDate: z.string(),
+    endDate: z.string(),
+  },
+  async ({ user_id, startDate, endDate }) => {
+    try {
+      const data = await getUserTTplanning(user_id, startDate, endDate);
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(data),
+          },
+        ],
+      };
+    } catch (error: any) {
+      console.log(error.response.data.message);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error: ${error.response.data.message}`,
+          },
+        ],
+      };
+    }
+  }
+);
+
+server.tool(
+  "get-range-planning",
+  "Get planning for all users in a date range",
+  {
+    startDate: z.string(),
+    endDate: z.string(),
+  },
+  async ({ startDate, endDate }) => {
+    try {
+      const data = await getRangeTTplanning(startDate, endDate);
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(data),
+          },
+        ],
+      };
+    } catch (error: any) {
+      console.log(error.response.data.message);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error: ${error.response.data.message}`,
+          },
+        ],
+      };
+    }
+  }
+);
 
   return server;
 }
