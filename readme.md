@@ -221,7 +221,7 @@ Retrieve planning for all users
 
 ## 👨‍💻 Author
 
-Your Name
+LANTOSOA Mirindra Lucien
 
 ---
 
