@@ -117,19 +117,20 @@ function createMcpServer(): McpServer {
 
   server.tool(
     "transfer-call",
-    "Transfer all active calls from AVR 5070 to another extension",
+    "Transfer call from voice bot to an agent",
     {
       extension: z.string().describe("Target extension to transfer the call to"),
+      uuid: z.uuidv4().describe("call unique id")
     },
-    async ({ extension }) => {
+    async ({ extension, uuid }) => {
       try {
-        const result = await transferCallToExtension(extension);
+        const result = await transferCallToExtension(extension, uuid);
 
         return {
           content: [
             {
               type: "text",
-              text: `Call(s) transferred to extension ${extension}`,
+              text: `result from server: ${JSON.stringify(result.data)}`,
             },
           ],
         };
@@ -138,7 +139,7 @@ function createMcpServer(): McpServer {
           content: [
             {
               type: "text",
-              text: `Transfer failed: ${error.message || error}`,
+              text: `Transfer failed: ${error.response?.data?.error || error.message || error}`,
             },
           ],
         };
@@ -319,6 +320,6 @@ app.delete("/mcp", async (req: Request, res: Response) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`✅ MCP Streamable HTTP server running on http://localhost:${PORT}/mcp`);
 });

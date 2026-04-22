@@ -1,97 +1,29 @@
-import ariClient from "ari-client";
+import axios from "axios";
 
-let ari: any;
+const ARI_URL = process.env.ARI_URL || "http://192.168.1.39:7070";
+const ariClient = axios.create({
+  baseURL: ARI_URL,
+  headers: {
+    "Content-Type": "application/json"
+  }
+});
 
-// init ARI une seule fois
-async function initAri() {
-  if (ari) return ari;
-
-  ari = await ariClient.connect(
-    "http://192.168.0.28:8088",
-    "avr",
-    "avr"
-  );
-
-  ari.start("avr-app");
-
-  return ari;
-}
 
 export async function callNumber(extension: string) {
   if (!/^\d{3,10}$/.test(extension)) {
     throw new Error("Invalid extension or number");
   }
-
-  const ari = await initAri();
-
-  const channel = await ari.channels.originate({
-    endpoint: `PJSIP/${extension}`,
-    app: "avr-app",
-    callerId: "AVR Bot",
+  return await ariClient.post("/call", {
+    extension: extension
   });
-
-  return {
-    channelId: channel.id,
-    extension,
-  };
 }
 
-export  async function transferCallToExtension (extension: string) {
-  if (!/^\d{3,5}$/.test(extension)) {
-    throw new Error("Invalid extension");
+export  async function transferCallToExtension (extension: string, uuid: string) {
+  if (!/^\d{3,10}$/.test(extension)) {
+    throw new Error("Invalid extension or number");
   }
-
-  const ari = await initAri();
-  const channels = await ari.channels.list();
-
-  const avrChannels = [];
-
-  for (const ch of channels) {
-    const res = await ari.channels.getChannelVar({
-      channelId: ch.id,
-      variable: "AVR_EXTEN",
-    });
-
-    if (res.value === "5070" && ch.state === "Up") {
-      avrChannels.push(ch);
-    }
-  }
-
-  if (avrChannels.length === 0) {
-    throw new Error("No active calls on 5070");
-  }
-
-  for (const ch of avrChannels) {
-    await ari.channels.continueInDialplan({
-      channelId: ch.id,
-      context: "demo",
-      extension,
-      priority: 1,
-    });
-  }
-
-  return avrChannels.length;
+  return await ariClient.post("/transfert", {
+    uuid: uuid,
+    targetExtension: extension
+  });
 };
-
-export async function transferWithBridge(extension: string) {
-  const ari = await initAri();
-
-  const channels = await ari.channels.list();
-
-  const avrChannels = channels.filter((ch: any) =>
-    ch.variables?.AVR_EXTEN === "5070"
-  );
-
-  const bridge = await ari.bridges.create({ type: "mixing" });
-
-  for (const ch of avrChannels) {
-    await bridge.addChannel({ channel: ch.id });
-  }
-
-  const agent = await ari.channels.originate({
-    endpoint: `PJSIP/${extension}`,
-    app: "avr-app",
-  });
-
-  await bridge.addChannel({ channel: agent.id });
-}
