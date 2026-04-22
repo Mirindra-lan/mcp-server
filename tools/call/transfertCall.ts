@@ -18,7 +18,7 @@ export async function callNumber(extension: string) {
   });
 }
 
-export  async function transferCallToExtension (extension: string, uuid: string) {
+export  async function transferCallToExtension (extension: string, uuid?: string) {
   if (!/^\d{3,10}$/.test(extension)) {
     throw new Error("Invalid extension or number");
   }

@@ -2,7 +2,7 @@ import axios from "axios";
 import https from "https";
 import ttApi from "./api";
 
-export async function getUserTTplanning(id: number, startDate: string, endDate: string) {
+export async function getUserTTplanning(startDate: string, endDate: string, id?: number) {
   const ttUrl = process.env.TT_URL;
   if (!ttUrl) throw new Error("TT_URL not configured");
 
