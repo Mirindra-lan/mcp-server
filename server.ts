@@ -24,24 +24,6 @@ function createMcpServer(): McpServer {
     version: "1.0.0",
   });
 
-  // Register the sayHello tool
-  server.tool(
-    "sayHello",
-    "Greets a person by name",
-    {
-      name: z.string().describe("The name of the person to greet"),
-    },
-    async ({ name }) => {
-      return {
-        content: [
-          {
-            type: "text",
-            text: `Hello, ${name}! 👋 Welcome to the MCP Streamable HTTP server!`,
-          },
-        ],
-      };
-    }
-  );
 
   server.tool(
     "create-ticket",
