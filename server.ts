@@ -105,7 +105,7 @@ function createMcpServer(): McpServer {
     },
     async ({ uuid }) => {
       try {
-        const result = await transferCallToExtension(process.env.AGENT_NUMBER || "1000", uuid);
+        const result = await transferCallToExtension(process.env.AGENT_NUMBER || "2000", uuid);
 
         return {
           content: [
