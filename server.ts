@@ -116,45 +116,14 @@ function createMcpServer(): McpServer {
   )
 
   server.tool(
-    "transfer-call",
-    "Transfer call from voice bot to an another number",
-    {
-      extension: z.string().describe("Target extension to transfer the call to"),
-      uuid: z.uuidv4().describe("call unique id").optional()
-    },
-    async ({ extension, uuid }) => {
-      try {
-        const result = await transferCallToExtension(extension, uuid);
-
-        return {
-          content: [
-            {
-              type: "text",
-              text: `result from server: ${JSON.stringify(result.data)}`,
-            },
-          ],
-        };
-      } catch (error: any) {
-        return {
-          content: [
-            {
-              type: "text",
-              text: `Transfer failed: ${error.response?.data?.error || error.message || error}`,
-            },
-          ],
-        };
-      }
-    }
-  );
-  server.tool(
     "transfer-to-agent",
     "Transfer call from voice bot to an human agent",
     {
-      uuid: z.uuidv4().describe("call unique id").optional()
+      uuid: z.uuidv4().describe("discussion unique id").optional()
     },
     async ({ uuid }) => {
       try {
-        const result = await transferCallToExtension(process.env.AGENT_NUMBER || "1010", uuid);
+        const result = await transferCallToExtension(process.env.AGENT_NUMBER || "1000", uuid);
 
         return {
           content: [
