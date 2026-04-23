@@ -29,8 +29,8 @@ function createMcpServer(): McpServer {
     "create-ticket",
     "Create GLPI ticket for a request or issue",
     {
-      name: z.string().describe("The subject of the ticket"),
-      content: z.string().describe("The description of the ticket"),
+      name: z.string().describe("The subject of the ticket that you put from the discussion"),
+      content: z.string().describe("The description of the ticket, put it from the discussion"),
       impact: z.number().int().describe("Impact (1-5)"),
       urgency: z.number().int().describe("Urgency (1-5)"),
       category: z.number().int().describe("Category ID"),
