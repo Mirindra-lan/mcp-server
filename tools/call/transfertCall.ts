@@ -27,3 +27,9 @@ export  async function transferCallToExtension (extension: string, uuid?: string
     targetExtension: extension
   });
 };
+
+export async function hangup(uuid?: string){
+  return await ariClient.post("/hangup", {
+    uuid: uuid
+  })
+}

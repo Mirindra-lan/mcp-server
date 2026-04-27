@@ -8,7 +8,7 @@ import { randomUUID } from "crypto";
 import cors from "cors";
 import "dotenv/config";
 import TicketManager from "./tools/ticket/ticketManager";
-import { transferCallToExtension, callNumber } from "./tools/call/transfertCall";
+import { transferCallToExtension, callNumber, hangup } from "./tools/call/transfertCall";
 import { getUserTTplanning, getRangeTTplanning } from "./tools/planning/getPlanning";
 
 const app = express();
@@ -127,6 +127,34 @@ function createMcpServer(): McpServer {
       }
     }
   );
+
+  server.tool(
+    "hangup",
+    "Terminate the call",
+    {
+      uuid: z.uuidv4().optional()
+    },
+    async ({uuid}) => {
+      try {
+        const result = await hangup(uuid);
+        return {
+          content: [
+            {
+              type: "text",
+              text: `result from server: ${JSON.stringify(result.data)}`
+            }
+          ]
+        }
+      } catch (error: any) {
+        return {
+          content: [{
+            type: "text",
+            text: `Hangup failed: ${error.response?.data?.error || error.message || error}`
+          }]
+        }
+      }
+    }
+  )
 
   server.tool(
   "call-number",
