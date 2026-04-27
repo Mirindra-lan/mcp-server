@@ -14,7 +14,7 @@ export async function callNumber(extension: string) {
     throw new Error("Invalid extension or number");
   }
   return await ariClient.post("/call", {
-    extension: extension, endpoint: `PJSIP/${extension}`
+    extension: extension
   });
 }
 
