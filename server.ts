@@ -20,8 +20,15 @@ const transports = new Map<string, StreamableHTTPServerTransport>();
 
 function createMcpServer(): McpServer {
   const server = new McpServer({
-    name: "hello-server",
+    name: "avr-mcp",
     version: "1.0.0",
+  },
+  {
+    capabilities: {
+      resources: {},
+      prompts: {},
+      tools: {}
+    }
   });
 
 
@@ -36,41 +43,42 @@ function createMcpServer(): McpServer {
       category: z.number().int().describe("Category ID"),
       location: z.number().int().describe("Location name or ID")
     },
-  async ({name, content, impact, urgency, category, location}) => {
-    const manager = new TicketManager();
-    try {
-      // Pass as string because Ticket constructor expects a string to parse
-      const res = await (manager as any).create(JSON.stringify({
-        name: name,
-        category: category,
-        content: content,
-        impact: impact,
-        urgency: urgency,
-        location: location
-      }));
+    async ({name, content, impact, urgency, category, location}) => {
+      const manager = new TicketManager();
+      try {
+        // Pass as string because Ticket constructor expects a string to parse
+        const res = await (manager as any).create(JSON.stringify({
+          name: name,
+          category: category,
+          content: content,
+          impact: impact,
+          urgency: urgency,
+          location: location
+        }));
 
-      if(res) {
+        if(res) {
+          return {
+            content: [
+              {type: "text", text: `Ticket created successfully, ticket information: ${JSON.stringify(res)}`}
+            ]
+          }
+        } else {
+          return {
+            content: [
+              {type: "text", text: `Creating ticket failed. Please check if category and location are valid.`}
+            ]
+          }
+        }
+
+      } catch (error: any) {
         return {
           content: [
-            {type: "text", text: `Ticket created successfully, ticket information: ${JSON.stringify(res)}`}
+            {type: "text", text: `Error create ticket, error information ${error.message || error}`}
           ]
         }
-      } else {
-        return {
-          content: [
-            {type: "text", text: `Creating ticket failed. Please check if category and location are valid.`}
-          ]
-        }
-      }
-
-    } catch (error: any) {
-      return {
-        content: [
-          {type: "text", text: `Error create ticket, error information ${error.message || error}`}
-        ]
       }
     }
-  });
+  );
 
   server.tool(
     "delete-ticket",
@@ -191,13 +199,13 @@ server.tool(
   "get-user-planning",
   "Get planning for a specific user between two dates",
   {
-    user_id: z.number().optional(),
+    matricule: z.number().optional(),
     startDate: z.string(),
     endDate: z.string(),
   },
-  async ({ user_id, startDate, endDate }) => {
+  async ({ matricule, startDate, endDate }) => {
     try {
-      const data = await getUserTTplanning(startDate, endDate, user_id);
+      const data = await getUserTTplanning(startDate, endDate, matricule);
 
       return {
         content: [
@@ -328,7 +336,7 @@ app.delete("/mcp", async (req: Request, res: Response) => {
   console.log(`[MCP] Session deleted: ${sessionId}`);
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = Number(process.env.PORT) || 3000 ;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`✅ MCP Streamable HTTP server running on http://localhost:${PORT}/mcp`);
 });
