@@ -38,10 +38,63 @@ function createMcpServer(): McpServer {
     {
       name: z.string().describe("The subject of the ticket that you put from the discussion"),
       content: z.string().describe("The description of the ticket, put it from the discussion"),
-      impact: z.number().int().describe("Impact (1-5)"),
-      urgency: z.number().int().describe("Urgency (1-5)"),
-      category: z.number().int().describe("Category ID"),
-      location: z.number().int().describe("Location name or ID")
+      impact: z.number().int().describe("Impact (1-5): guess from the conversation"),
+      urgency: z.number().int().describe("Urgency (1-5): guess from the conversation"),
+      category: z.number().int().describe(`Category ID:
+1 PROBLEME DE CONNEXION
+2 PROBLEME DE DEMARRAGE DE PC
+3 SITE / LIEN BLOQUE
+4 PROBLEME D'ECRAN
+5 PROBLEME DE CHAISE
+6 2FA
+7 CONFIGURATION EYEBEAM / VICIDIAL
+8 CONFIGURATION MAIL
+9 CONFIGURATION NOUVEAU POSTE
+10 DEBLOCAGE DE SITE/LIEN
+11 ASSISTANCE UTILISATEUR
+12 ENREGISTREMENT DE POINTAGE
+13 DEMANDE DE PERIPHERIQUE
+14 DEMANDE NOUVEAU SOURIS
+15 DEMANDE NOUVEAU CLAVIER
+17 DEMANDE DEUXIEME ECRAN
+18 PROBLEME D'ELECTRICITE
+19 PROBLEME D'ECLAIRAGE
+20 COUPURE DE COURANT
+21 DEMANDE DE PREPARATION DE SALLE VISIO
+22 DEMANDE DE TELECHARGEMENT
+23 TIME TRACKING`),
+      location: z.number().int().describe(`Location name or ID:
+1 SETEX1
+2 SETEX2
+3 LATONELLE
+4 MONTECRISTO
+5 GEODEK
+6 SETEX1>SOUS-SOL
+7 SETEX1>RDC
+8 SETEX1>R+1
+9 SETEX1>R+2
+10 SETEX1>DMZ
+11 MONTECRISTO>GARAGE
+12 MONTECRISTO>RDC
+13 MONTECRISTO>R+1
+14 MONTECRISTO>R+2
+15 MONTECRISTO>DMZ
+16 SETEX1>SOUS-SOL>VISIO
+17 SETEX1>RDC>VISIO
+18 STEXT1>R+2>VISIO
+19 SETEX2>R+1
+20 SETEX2>APPARTEMENT
+21 SETEX2>RDC
+22 GEODEK>RDC
+23 GEODEK>R+1
+24 GEODEK>R+2
+25 GEODEK>R+3
+26 LATONELLE>RDC
+27 LATONELLE>R+1
+28 LATONELLE>R+2
+29 MONTECRISTO>RDC>VISIO
+30 MONTECRISTO>R+1>VISIO
+31 MONTECRISTO>R+2>VISIO`)
     },
     async ({name, content, impact, urgency, category, location}) => {
       const manager = new TicketManager();
