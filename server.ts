@@ -254,7 +254,7 @@ server.tool(
   {
     matricule: z.number().optional(),
     startDate: z.string(),
-    endDate: z.string(),
+    endDate: z.string().optional(),
   },
   async ({ matricule, startDate, endDate }) => {
     try {
@@ -287,7 +287,7 @@ server.tool(
   "Get planning for all users in a date range",
   {
     startDate: z.string(),
-    endDate: z.string(),
+    endDate: z.string().optional(),
   },
   async ({ startDate, endDate }) => {
     try {
